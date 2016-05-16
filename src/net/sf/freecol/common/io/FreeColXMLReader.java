@@ -653,7 +653,7 @@ public class FreeColXMLReader extends StreamReaderDelegate
         } else {
             FreeColObject fco = lookup(game, id);
             if (fco == null) {
-                T ret = game.newInstance(returnClass,
+                T ret = game.newInstanceGameClass(returnClass,
                     getReadScope() == ReadScope.SERVER);
                 if (ret == null) {
                     String err = "Failed to create " + returnClass.getName()

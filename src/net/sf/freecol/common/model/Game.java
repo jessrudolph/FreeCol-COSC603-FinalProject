@@ -229,13 +229,13 @@ public class Game extends FreeColGameObject {
      * @param server Create a server object if possible.
      * @return The new uninitialized object, or null on error.
      */
-    public <T extends FreeColObject> T newInstance(Class<T> returnClass,
+    public <T extends FreeColObject> T newInstanceGameClass(Class<T> returnClass,
                                                    boolean server) {
         @SuppressWarnings("unchecked")
        final Class<T> rc = !server ? null : (Class<T>) serverClasses.get(returnClass);
-        return FreeColGameObject.newInstance(this,
-            rc != null ? rc : returnClass);
+        return FreeColGameObject.newInstance(this, rc != null ? rc : returnClass);
     }
+    
     
     /**
      * Get the difficulty level of this game.
@@ -396,7 +396,7 @@ public class Game extends FreeColGameObject {
      * @return The <code>Location</code> if any.
      */
     public Location findFreeColLocation(String id) {
-        FreeColGameObject fcgo = getFreeColGameObject(id);
+        final FreeColGameObject fcgo = getFreeColGameObject(id);
         return !(fcgo instanceof Location) ? null : (Location) fcgo;
     }
 
@@ -540,7 +540,7 @@ public class Game extends FreeColGameObject {
      * @return A list of live <code>Player</code>s, with exclusions.
      */
     public List<Player> getOtherLivePlayers(Player... players) {
-        List<Player> result = getLivePlayers(null);
+        final List<Player> result = getLivePlayers(null);
         for (Player other : players) result.remove(other);
         return result;
     }
@@ -639,7 +639,7 @@ public class Game extends FreeColGameObject {
     public boolean addPlayer(Player player) {
         if (player.isAI() || canAddNewPlayer()) {
             players.add(player);
-            Nation nation = getSpecification().getNation(player.getNationId());
+            final Nation nation = getSpecification().getNation(player.getNationId());
             nationOptions.getNations().put(nation, NationState.NOT_AVAILABLE);
             if (currentPlayer == null) currentPlayer = player;
             return true;
@@ -656,12 +656,12 @@ public class Game extends FreeColGameObject {
      * @return True if the player was removed.
      */
     public boolean removePlayer(Player player) {
-        Player newCurrent = (currentPlayer != player) ? null
+        final Player newCurrent = (currentPlayer != player) ? null
             : getPlayerAfter(currentPlayer);
 
         if (!players.remove(player)) return false;
 
-        Nation nation = getSpecification().getNation(player.getNationId());
+        final Nation nation = getSpecification().getNation(player.getNationId());
         nationOptions.getNations().put(nation, NationState.AVAILABLE);
         player.dispose();
 
@@ -957,8 +957,8 @@ public class Game extends FreeColGameObject {
      *     <code>Player</code>.
      */
     public void checkOwners(Ownable o, Player oldOwner) {
-        Player newOwner = o.getOwner();
-        if (oldOwner == newOwner) return;
+        final Player newOwner = o.getOwner();
+        if (oldOwner.equals(newOwner)) return;
 
         if (oldOwner != null && oldOwner.removeOwnable(o)) {
             oldOwner.invalidateCanSeeTiles();//+vis
@@ -1049,9 +1049,9 @@ public class Game extends FreeColGameObject {
 
         // Memory
         System.gc();
-        long free = Runtime.getRuntime().freeMemory()/(1024*1024);
-        long total = Runtime.getRuntime().totalMemory()/(1024*1024);
-        long max = Runtime.getRuntime().maxMemory()/(1024*1024);
+        final long free = Runtime.getRuntime().freeMemory()/(1024*1024);
+        final long total = Runtime.getRuntime().totalMemory()/(1024*1024);
+        final long max = Runtime.getRuntime().maxMemory()/(1024*1024);
         stats.put("freeMemory", Long.toString(free));
         stats.put("totalMemory", Long.toString(total));
         stats.put("maxMemory", Long.toString(max));
@@ -1097,39 +1097,36 @@ public class Game extends FreeColGameObject {
     @Override
     public int checkIntegrity(boolean fix) {
         int result = super.checkIntegrity(fix);
-        LogBuilder lb = new LogBuilder(512);
+        final LogBuilder lb = new LogBuilder(512);
         lb.add("Uninitialized game ids: ");
         lb.mark();
-        Iterator<FreeColGameObject> iterator = getFreeColGameObjectIterator();
+        final Iterator<FreeColGameObject> iterator = getFreeColGameObjectIterator();
         while (iterator.hasNext()) {
             FreeColGameObject fcgo = iterator.next();
-            if (fcgo == null) {
-                lb.add(" null-fcgo");
-            } else if (!fcgo.isInitialized()) {
-                lb.add(" ", fcgo.getId(),
-                    "(", lastPart(fcgo.getClass().getName(), "."), ")");
-            } else {
-                continue;
-            }
-            if (fix) {
-                iterator.remove();
-                result = Math.min(result, 0);
-            } else {
-                result = -1;
-            }
+            if (fcgo == null)
+				lb.add(" null-fcgo");
+			else {
+				if (fcgo.isInitialized())
+					continue;
+				lb.add(" ", fcgo.getId(), "(", lastPart(fcgo.getClass().getName(), "."), ")");
+			}
+            if (!fix)
+				result = -1;
+			else {
+				iterator.remove();
+				result = Math.min(result, 0);
+			}
         }
         if (lb.grew()) {
             if (fix) lb.add(" (dropped)");
             lb.log(logger, Level.WARNING);
         }
 
-        Map map = getMap();
-        if (map != null) {
-            result = Math.min(result, getMap().checkIntegrity(fix));
-        }
-        for (Player player : getPlayers()) {
-            result = Math.min(result, player.checkIntegrity(fix));
-        }
+        final Map map = getMap();
+        if (map != null)
+			result = Math.min(result, getMap().checkIntegrity(fix));
+        for (Player player : getPlayers())
+			result = Math.min(result, player.checkIntegrity(fix));
         return result;
     }
 
@@ -1256,8 +1253,8 @@ public class Game extends FreeColGameObject {
 
         nationOptions.toXML(xw);
 
-        List<Player> players = toSortedList(getPlayers());
-        Player unknown = getUnknownEnemy();
+        final List<Player> players = toSortedList(getPlayers());
+        final Player unknown = getUnknownEnemy();
         if (unknown != null) players.add(unknown);
         for (Player p : players) p.toXML(xw);
 
