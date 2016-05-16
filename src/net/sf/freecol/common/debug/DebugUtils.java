@@ -1,4 +1,4 @@
-/**
+/*
  *  Copyright (C) 2002-2016   The FreeCol Team
  *
  *  This file is part of FreeCol.
@@ -122,7 +122,9 @@ public class DebugUtils {
             "cancel",
             toSortedList(map(spec.getBuildingTypeList(), (BuildingType bt) ->
                     new ChoiceItem<BuildingType>(Messages.getName(bt), bt))));
-        if (buildingType == null) return;
+        if (buildingType == null) {
+			return;
+		}
 
         final Game sGame = server.getGame();
         final BuildingType sBuildingType = server.getSpecification()
@@ -131,8 +133,9 @@ public class DebugUtils {
                                                           Player.class);
         List<String> results = new ArrayList<>();
         int fails = 0;
-        for (Colony sColony : sPlayer.getColonies())
+        for (Colony sColony : sPlayer.getColonies()) {
 			fails = colonyBuildPlayerNull(sGame, sBuildingType, results, fails, sColony);
+		}
         gui.showInformationMessage(join(", ", results));
         if (fails < sPlayer.getSettlements().size()) {
             // Brutally resynchronize
@@ -146,9 +149,9 @@ public class DebugUtils {
             Colony.NoBuildReason reason
                 = sColony.getNoBuildReason(sBuildingType, null);
             results.add(sColony.getName() + ": " + reason);
-            if (reason == Colony.NoBuildReason.NONE)
+            if (reason == Colony.NoBuildReason.NONE) {
 				colonyBuildNull(sGame, sBuildingType, sColony);
-			else {
+			} else {
                 fails++;
             }
         }
@@ -215,7 +218,9 @@ public class DebugUtils {
         String response = gui.getInput(null,
             StringTemplate.template("prompt.selectGold"),
             Integer.toString(1000), "ok", "cancel");
-        if (response == null || response.isEmpty()) return;
+        if (response == null || response.isEmpty()) {
+			return;
+		}
         int gold;
         try {
             gold = Integer.parseInt(response);
@@ -244,7 +249,9 @@ public class DebugUtils {
         String response = gui.getInput(null,
             StringTemplate.template("prompt.selectImmigration"),
             Integer.toString(100), "ok", "cancel");
-        if (response == null || response.isEmpty()) return;
+        if (response == null || response.isEmpty()) {
+			return;
+		}
         int crosses;
         try {
             crosses = Integer.parseInt(response);
@@ -271,7 +278,9 @@ public class DebugUtils {
         String response = gui.getInput(null,
             StringTemplate.template("prompt.selectLiberty"),
             Integer.toString(100), "ok", "cancel");
-        if (response == null || response.isEmpty()) return;
+        if (response == null || response.isEmpty()) {
+			return;
+		}
         int liberty;
         try {
             liberty = Integer.parseInt(response);
@@ -296,7 +305,9 @@ public class DebugUtils {
     public static void addSkipChangeListener(final FreeColClient freeColClient,
                                              JMenu menu, final JMenuItem item) {
         final FreeColServer server = freeColClient.getFreeColServer();
-        if (server == null) return;
+        if (server == null) {
+			return;
+		}
 
         menu.addChangeListener((ChangeEvent e) -> {
                 boolean skipping = server.getInGameController()
@@ -327,7 +338,9 @@ public class DebugUtils {
         final GUI gui = freeColClient.getGUI();
 
         UnitType unitChoice = guiUnitChoiceThing(sSpec, gui);
-        if (unitChoice == null) return;
+        if (unitChoice == null) {
+			return;
+		}
 
         Unit carrier = null, sCarrier = null;
         if (!sTile.isLand() && !unitChoice.isNaval()) {
@@ -375,12 +388,16 @@ public class DebugUtils {
         final GUI gui = freeColClient.getGUI();
 
         GoodsType goodsType = goodsGuiChoiceItemGoods(sSpec, gui);
-        if (goodsType == null) return;
+        if (goodsType == null) {
+			return;
+		}
 
         String amount = gui.getInput(null,
             StringTemplate.template("prompt.selectGoodsAmount"),
             "20", "ok", "cancel");
-        if (amount == null) return;
+        if (amount == null) {
+			return;
+		}
 
         int a;
         try {
@@ -426,7 +443,9 @@ public class DebugUtils {
             return;
         }
         Disaster disaster = guiNullChoice(gui, disasters);
-        if (disaster == null) return;
+        if (disaster == null) {
+			return;
+		}
 
         final FreeColServer server = freeColClient.getFreeColServer();
         final Game sGame = server.getGame();
@@ -435,8 +454,9 @@ public class DebugUtils {
         final Disaster sDisaster = sGame.getSpecification()
             .getDisaster(disaster.getId());
         if (server.getInGameController().debugApplyDisaster(sColony, sDisaster)
-            <= 0)
+            <= 0) {
 			gameControllerErrorMsg(colony, gui, disaster);
+		}
         freeColClient.getInGameController().nextModelMessage();
     }
 
@@ -476,7 +496,9 @@ public class DebugUtils {
         final Game game = freeColClient.getGame();
 
         Player player = playerGuiChoice(colony, gui, game);
-        if (player == null) return;
+        if (player == null) {
+			return;
+		}
 
         ServerPlayer sPlayer = sGame.getFreeColGameObject(player.getId(),
                                                           ServerPlayer.class);
@@ -513,7 +535,9 @@ public class DebugUtils {
         final Game game = unit.getGame();
 
         Player player = ownerOfColony(unit, gui, game);
-        if (player == null || unit.getOwner() == player) return;
+        if (player == null || unit.getOwner() == player) {
+			return;
+		}
 
         final Game sGame = server.getGame();
         ServerUnit sUnit = sGame.getFreeColGameObject(unit.getId(), 
@@ -561,7 +585,9 @@ public class DebugUtils {
             StringTemplate.template("prompt.selectRole"), "cancel",
             toSortedList(map(sGame.getSpecification().getRoles(),
                     (Role r) -> new ChoiceItem<Role>(r.getId(), r))));
-        if (roleChoice == null) return;
+        if (roleChoice == null) {
+			return;
+		}
 
         sUnit.changeRole(roleChoice, roleChoice.getMaximumCount());
         freeColClient.getConnectController().reconnect();
@@ -590,10 +616,14 @@ public class DebugUtils {
         LogBuilder lb = new LogBuilder(256);
         lb.add("Desynchronization detected\n");
         for (Tile t : sMap.getAllTiles()) {
-            if (!sPlayer.canSee(t)) continue;
+            if (!sPlayer.canSee(t)) {
+				continue;
+			}
             for (Unit u : t.getUnitList()) {
                 if (!sPlayer.owns(u)
-                    && (t.hasSettlement() || u.isOnCarrier())) continue;
+                    && (t.hasSettlement() || u.isOnCarrier())) {
+					continue;
+				}
                 if (game.getFreeColGameObject(u.getId(), Unit.class) == null) {
                     lb.add("Unit missing on client-side.\n", "  Server: ",
                            u.getDescription(Unit.UnitLabelType.NATIONAL),
@@ -631,8 +661,9 @@ public class DebugUtils {
                     lb.add("Settlement still present in client: ", cSettlement);
                     problemDetected = true;
                 }
-            } else
+            } else {
 				problemDetected = problemDetected(problemDetected, lb, sSettlement, cSettlement);
+			}
         }
 
         boolean goodsProblemDetected = false;
@@ -690,13 +721,13 @@ public class DebugUtils {
         final FreeColServer server = freeColClient.getFreeColServer();
         final AIMain aiMain = server.getAIMain();
         final AIColony aiColony = aiMain.getAIColony(colony);
-        if (aiColony == null) {
+        if (aiColony != null) {
+            // TODO: Missing i18n
+            freeColClient.getGUI().showInformationMessage(aiColony.planToString());
+        } else {
             freeColClient.getGUI().showErrorMessage(StringTemplate
                 .template("error.notAIColony")
                 .addName("%colony%", colony.getName()));
-        } else {
-            // TODO: Missing i18n
-            freeColClient.getGUI().showInformationMessage(aiColony.planToString());
         }
     }
 
@@ -712,7 +743,9 @@ public class DebugUtils {
      */
     public static String getColonyValue(Tile tile) {
         Player player = FreeColDebugger.debugDisplayColonyValuePlayer();
-        if (player == null) return null;
+        if (player == null) {
+			return null;
+		}
         int value = player.getColonyValue(tile);
         if (value < 0) {
             return Player.NoValueType.fromValue(value).toString();
@@ -739,7 +772,9 @@ public class DebugUtils {
         HashMap<String,List<Unit>> units = new HashMap<>();
         for (Player tp : sGame.getLiveEuropeanPlayers(null)) {
             Player p = sGame.getFreeColGameObject(tp.getId(), Player.class);
-            if (p.getEurope() == null) continue;
+            if (p.getEurope() == null) {
+				continue;
+			}
             inEurope.clear();
             toEurope.clear();
             toAmerica.clear();
@@ -764,7 +799,9 @@ public class DebugUtils {
             for (Entry<String, List<Unit>> entry : units.entrySet()) {
                 final String label = entry.getKey();
                 final List<Unit> list = entry.getValue();
-                if (list.isEmpty()) continue;
+                if (list.isEmpty()) {
+					continue;
+				}
                 lb.add("\n->", label, "\n");
                 for (Unit u : list) {
                     lb.add("\n", u.getDescription(Unit.UnitLabelType.NATIONAL));
@@ -828,8 +865,9 @@ public class DebugUtils {
         lb.add("\nActive units:\n");
 
         Unit u, first = player.getNextActiveUnit();
-        if (first != null)
+        if (first != null) {
 			firstNotNull(player, all, lb, first);
+		}
         lb.add("Going-to units:\n");
         first = player.getNextGoingToUnit();
         if (first != null) {
@@ -966,13 +1004,17 @@ public class DebugUtils {
                 (GoodsType gt) ->
                     new ChoiceItem<GoodsType>(Messages.getName(gt), gt),
                 Collectors.toList()));
-        if (goodsType == null) return;
+        if (goodsType == null) {
+			return;
+		}
 
         String response = freeColClient.getGUI().getInput(null,
                 StringTemplate.template("prompt.selectGoodsAmount"),
                 Integer.toString(colony.getGoodsCount(goodsType)),
                 "ok", "cancel");
-        if (response == null || response.isEmpty()) return;
+        if (response == null || response.isEmpty()) {
+			return;
+		}
         int a;
         try {
             a = Integer.parseInt(response);
@@ -1012,7 +1054,9 @@ public class DebugUtils {
             "cancel",
             toSortedList(map(MonarchAction.values(), (MonarchAction a) ->
                     new ChoiceItem<MonarchAction>(a))));
-        if (action == null) return;
+        if (action == null) {
+			return;
+		}
         
         server.getInGameController().setMonarchAction(sPlayer, action);
     }
@@ -1039,7 +1083,9 @@ public class DebugUtils {
                 r -> r != RumourType.NO_SUCH_RUMOUR,
                 (RumourType r) -> new ChoiceItem<RumourType>(r.toString(), r),
                 Collectors.toList()));
-        if (rumourChoice == null) return;
+        if (rumourChoice == null) {
+			return;
+		}
 
         tile.getTileItemContainer().getLostCityRumour().setType(rumourChoice);
         sTile.getTileItemContainer().getLostCityRumour()
@@ -1059,14 +1105,18 @@ public class DebugUtils {
         String response = freeColClient.getGUI().getInput(null,
             StringTemplate.key("prompt.selectTurnsToSkip"),
             Integer.toString(10), "ok", "cancel");
-        if (response == null || response.isEmpty()) return;
+        if (response == null || response.isEmpty()) {
+			return;
+		}
         int skip;
         try {
             skip = Integer.parseInt(response);
         } catch (NumberFormatException nfe) {
             skip = -1;
         }
-        if (skip > 0) freeColClient.skipTurns(skip);
+        if (skip > 0) {
+			freeColClient.skipTurns(skip);
+		}
     }
 
     /**
@@ -1135,9 +1185,9 @@ public class DebugUtils {
         for (Player p : sGame.getLiveEuropeanPlayers(null)) {
             Tension tension = sis.getAlarm(p);
             lb.add(Messages.message(p.getNationLabel()),
-                   " ", ((tension == null) ? "(none)"
-                       : Integer.toString(tension.getValue())),
-                   ((mostHated == p) ? " (most hated)" : ""),
+                   " ", (tension == null) ? "(none)"
+                       : Integer.toString(tension.getValue()),
+                   (mostHated == p) ? " (most hated)" : "",
                    " ", Messages.message(sis.getAlarmLevelKey(p)),
                    " ", sis.getContactLevel(p), "\n");
         }
@@ -1148,7 +1198,7 @@ public class DebugUtils {
             int prod = sis.getTotalProductionOf(gt);
             if (amount > 0 || prod != 0) {
                 lb.add(Messages.message(AbstractGoods.getLabel(gt, amount)),
-                    " ", ((prod > 0) ? "+" : ""), prod, "\n");
+                    " ", (prod > 0) ? "+" : "", prod, "\n");
             }
         }
 
@@ -1163,26 +1213,32 @@ public class DebugUtils {
         for (GoodsType type : sSpec.getStorableGoodsTypeList()) {
             int i;
             for (i = wanted.length - 1; i >= 0; i--) {
-                if (type == wanted[i]) break;
+                if (type == wanted[i]) {
+					break;
+				}
             }
             lb.add(Messages.getName(type),
                    ": ", sis.getPriceToBuy(type, 1),
                    "/", sis.getPriceToBuy(type, 100),
                    " / ", sis.getPriceToSell(type, 1),
                    "/", sis.getPriceToSell(type, 100),
-                   ((i < 0) ? "" : " wanted[" + Integer.toString(i) + "]"),
+                   (i < 0) ? "" : " wanted[" + i + "]",
                    "\n");
         }
 
         lb.add("\nUnits present\n");
-        for (Unit u : sis.getUnitList())
+        for (Unit u : sis.getUnitList()) {
 			missionUnitList(aiMain, lb, u);
+		}
         lb.add("\nUnits owned\n");
-        for (Unit u : sis.getOwnedUnits())
+        for (Unit u : sis.getOwnedUnits()) {
 			missionUnitList(aiMain, lb, u);
+		}
 
         lb.add("\nTiles\n");
-        for (Tile t : sis.getOwnedTiles()) lb.add(t, "\n");
+        for (Tile t : sis.getOwnedTiles()) {
+			lb.add(t, "\n");
+		}
 
         lb.add("\nConvert Progress = ", sis.getConvertProgress());
         lb.add("\nLast Tribute = ", sis.getLastTribute());
