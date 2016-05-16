@@ -1,3 +1,4 @@
+// $codepro.audit.disable
 /*
  *  Copyright (C) 2002-2016   The FreeCol Team
  *
@@ -162,42 +163,41 @@ public class ResourceFactory {
      *      already been created, or a new instance if not.
      */
     public static void createResource(URI i, ResourceSink output) {
-        if(findResource(i, output)) {
+        if(findResource(i, output))
 			return;
-		}
 
         try {
             if ("urn".equals(i.getScheme())) {
 				if (i.getSchemeSpecificPart().startsWith(ColorResource.SCHEME)) {
-					ColorResource cr = new ColorResource(i);
+					final ColorResource cr = new ColorResource(i);
 					output.add(cr);
 					colorResources.put(i, new WeakReference<>(cr));
 				} else if (i.getSchemeSpecificPart().startsWith(FontResource.SCHEME)) {
-					FontResource fr = new FontResource(i);
+					final FontResource fr = new FontResource(i);
 					output.add(fr);
 					fontResources.put(i, new WeakReference<>(fr));
 				} else if (i.getPath().endsWith("\"")
                     && i.getPath().lastIndexOf('"',
                             i.getPath().length()-1) >= 0) {
-                StringResource sr = new StringResource(i);
+                final StringResource sr = new StringResource(i);
                 output.add(sr);
                 stringResources.put(i, new WeakReference<>(sr));
             } else if (i.getPath().endsWith(".faf")) {
-                FAFileResource far = new FAFileResource(i);
+                final FAFileResource far = new FAFileResource(i);
                 output.add(far);
                 fafResources.put(i, new WeakReference<>(far));
             } else if (i.getPath().endsWith(".sza")) {
-                SZAResource szr = new SZAResource(i);
+                final SZAResource szr = new SZAResource(i);
                 output.add(szr);
                 szaResources.put(i, new WeakReference<>(szr));
             } else if (i.getPath().endsWith(".ttf")) {
-                FontResource fr = new FontResource(i);
+                final FontResource fr = new FontResource(i);
                 output.add(fr);
                 fontResources.put(i, new WeakReference<>(fr));
             } else if (!i.getPath().endsWith(".wav")) {
 				thePathToDo(i, output);
 			} else {
-				AudioResource ar = new AudioResource(i);
+				final AudioResource ar = new AudioResource(i);
 				output.add(ar);
 				audioResources.put(i, new WeakReference<>(ar));
 			}
@@ -209,15 +209,15 @@ public class ResourceFactory {
 
 	private static void thePathToDo(URI i, ResourceSink output) throws IOException, Exception {
 		if (!i.getPath().endsWith(".ogg")) {
-			ImageResource ir = new ImageResource(i);
+			final ImageResource ir = new ImageResource(i);
 			output.add(ir);
 			imageResources.put(i, new WeakReference<>(ir));
 		} else if (i.getPath().endsWith(".video.ogg")) {
-			VideoResource vr = new VideoResource(i);
+			final VideoResource vr = new VideoResource(i);
 			output.add(vr);
 			videoResources.put(i, new WeakReference<>(vr));
 		} else {
-			AudioResource ar = new AudioResource(i);
+			final AudioResource ar = new AudioResource(i);
 			output.add(ar);
 			audioResources.put(i, new WeakReference<>(ar));
 		}
