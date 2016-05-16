@@ -159,14 +159,9 @@ public class DebugUtils {
 	}
 
 	private static void colonyBuildNull(final Game sGame, final BuildingType sBuildingType, Colony sColony) {
-		{
-		    if (sBuildingType.isDefenceType()) {
-		        sColony.getTile().cacheUnseen();//+til
-		    }
-		    Building sBuilding = new ServerBuilding(sGame, sColony,
-		                                            sBuildingType);
-		    sColony.addBuilding(sBuilding);//-til
-		}
+		if (sBuildingType.isDefenceType())
+			sColony.getTile().cacheUnseen();
+		sColony.addBuilding((new ServerBuilding(sGame, sColony, sBuildingType)));
 	}
 
     /**
@@ -298,13 +293,13 @@ public class DebugUtils {
      * Adds a change listener to a menu (the debug menu in fact),
      * that changes the label on a menu item when the skip status changes.
      *
-     * @param freeColClient The <code>FreeColClient</code> for the game.
+     * @param c The <code>FreeColClient</code> for the game.
      * @param menu The menu to add the change listener to.
      * @param item The menu item whose label should change.
      */
-    public static void addSkipChangeListener(final FreeColClient freeColClient,
+    public static void addSkipChangeListener(final FreeColClient c,
                                              JMenu menu, final JMenuItem item) {
-        final FreeColServer server = freeColClient.getFreeColServer();
+        final FreeColServer server = c.getFreeColServer();
         if (server == null) {
 			return;
 		}
