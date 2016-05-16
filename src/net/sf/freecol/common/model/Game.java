@@ -229,7 +229,7 @@ public class Game extends FreeColGameObject {
      * @param server Create a server object if possible.
      * @return The new uninitialized object, or null on error.
      */
-    public <T extends FreeColObject> T newInstanceGameClass(Class<T> returnClass,
+    public final <T extends FreeColObject> T newInstanceGameClass(Class<T> returnClass,
                                                    boolean server) {
         @SuppressWarnings("unchecked")
        final Class<T> rc = !server ? null : (Class<T>) serverClasses.get(returnClass);
