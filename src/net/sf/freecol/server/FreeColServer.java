@@ -966,7 +966,7 @@ public final class FreeColServer {
                         xr.nextTag();
                     }
 
-                } else if (Game.getTagName().equals(tag)) {
+                } else if (Game.getTagNameGameClass().equals(tag)) {
                     // Read the game
                     game = new ServerGame(xr, specification);
                     game.setCurrentPlayer(null);

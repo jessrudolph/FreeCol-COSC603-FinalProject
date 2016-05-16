@@ -232,10 +232,9 @@ public class Game extends FreeColGameObject {
     public <T extends FreeColObject> T newInstance(Class<T> returnClass,
                                                    boolean server) {
         @SuppressWarnings("unchecked")
-        Class<T> rc = (server) ? (Class<T>)serverClasses.get(returnClass)
-            : null;
+       final Class<T> rc = !server ? null : (Class<T>) serverClasses.get(returnClass);
         return FreeColGameObject.newInstance(this,
-            (rc == null) ? returnClass : rc);
+            rc != null ? rc : returnClass);
     }
     
     /**
@@ -323,7 +322,7 @@ public class Game extends FreeColGameObject {
      */
     public <T extends FreeColGameObject> T getFreeColGameObject(String id,
         Class<T> returnClass) {
-        FreeColGameObject fcgo = getFreeColGameObject(id);
+      final  FreeColGameObject fcgo = getFreeColGameObject(id);
         try {
             return returnClass.cast(fcgo);
         } catch (ClassCastException e) {
@@ -398,7 +397,7 @@ public class Game extends FreeColGameObject {
      */
     public Location findFreeColLocation(String id) {
         FreeColGameObject fcgo = getFreeColGameObject(id);
-        return (fcgo instanceof Location) ? (Location)fcgo : null;
+        return !(fcgo instanceof Location) ? null : (Location) fcgo;
     }
 
     /**
@@ -1366,14 +1365,14 @@ public class Game extends FreeColGameObject {
      * {@inheritDoc}
      */
     @Override
-    public String getXMLTagName() { return getTagName(); }
+    public String getXMLTagName() { return getTagNameGameClass(); }
 
     /**
      * Gets the tag name of the root element representing this object.
      *
      * @return "game".
      */
-    public static String getTagName() {
+    public static String getTagNameGameClass() {
         return "game";
     }
 }
