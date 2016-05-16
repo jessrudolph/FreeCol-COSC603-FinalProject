@@ -1,4 +1,4 @@
-/**
+/*
  *  Copyright (C) 2002-2016   The FreeCol Team
  *
  *  This file is part of FreeCol.
@@ -19,6 +19,7 @@
 
 package net.sf.freecol.common.resources;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.Map;
@@ -76,14 +77,14 @@ public class ResourceFactory {
     /**
      * Check for previously created resources.
      *
-     * @param uri The <code>URI</code> used when creating the instance.
+     * @param i The <code>URI</code> used when creating the instance.
      * @param output Where a previously created instance of <code>Resource</code>
      *      with the given <code>URI</code> is put if such an object has
      *      already been created.
      * @return If a Resource is found.
      */
-    private static boolean findResource(URI uri, ResourceSink output) {
-        final WeakReference<ColorResource> crwr = colorResources.get(uri);
+    private static boolean findResource(URI i, ResourceSink output) {
+        final WeakReference<ColorResource> crwr = colorResources.get(i);
         if(crwr != null) {
             final ColorResource cr = crwr.get();
             if (cr != null) {
@@ -91,7 +92,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<FontResource> frwr = fontResources.get(uri);
+        final WeakReference<FontResource> frwr = fontResources.get(i);
         if(frwr != null) {
             final FontResource fr = frwr.get();
             if (fr != null) {
@@ -99,7 +100,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<StringResource> srwr = stringResources.get(uri);
+        final WeakReference<StringResource> srwr = stringResources.get(i);
         if(srwr != null) {
             final StringResource sr = srwr.get();
             if (sr != null) {
@@ -107,7 +108,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<FAFileResource> farwr = fafResources.get(uri);
+        final WeakReference<FAFileResource> farwr = fafResources.get(i);
         if(farwr != null) {
             final FAFileResource far = farwr.get();
             if (far != null) {
@@ -115,7 +116,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<SZAResource> szrwr = szaResources.get(uri);
+        final WeakReference<SZAResource> szrwr = szaResources.get(i);
         if(szrwr != null) {
             final SZAResource szr = szrwr.get();
             if (szr != null) {
@@ -123,7 +124,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<AudioResource> arwr = audioResources.get(uri);
+        final WeakReference<AudioResource> arwr = audioResources.get(i);
         if(arwr != null) {
             final AudioResource ar = arwr.get();
             if (ar != null) {
@@ -131,7 +132,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<VideoResource> vrwr = videoResources.get(uri);
+        final WeakReference<VideoResource> vrwr = videoResources.get(i);
         if(vrwr != null) {
             final VideoResource vr = vrwr.get();
             if (vr != null) {
@@ -139,7 +140,7 @@ public class ResourceFactory {
                 return true;
             }
         }
-        final WeakReference<ImageResource> irwr = imageResources.get(uri);
+        final WeakReference<ImageResource> irwr = imageResources.get(i);
         if(irwr != null) {
             final ImageResource ir = irwr.get();
             if (ir != null) {
@@ -154,67 +155,72 @@ public class ResourceFactory {
      * Returns an instance of <code>Resource</code> with the
      * given <code>URI</code> as the parameter.
      *
-     * @param uri The <code>URI</code> used when creating the
+     * @param i The <code>URI</code> used when creating the
      *      instance.
      * @param output Where a previously created instance of <code>Resource</code>
      *      with the given <code>URI</code> is put if such an object has
      *      already been created, or a new instance if not.
      */
-    public static void createResource(URI uri, ResourceSink output) {
-        if(findResource(uri, output))
-            return;
+    public static void createResource(URI i, ResourceSink output) {
+        if(findResource(i, output)) {
+			return;
+		}
 
         try {
-            if ("urn".equals(uri.getScheme())) {
-                if (uri.getSchemeSpecificPart().startsWith(ColorResource.SCHEME)) {
-                    ColorResource cr = new ColorResource(uri);
-                    output.add(cr);
-                    colorResources.put(uri, new WeakReference<>(cr));
-                } else if (uri.getSchemeSpecificPart().startsWith(FontResource.SCHEME)) {
-                    FontResource fr = new FontResource(uri);
-                    output.add(fr);
-                    fontResources.put(uri, new WeakReference<>(fr));
-                }
-            } else if (uri.getPath().endsWith("\"")
-                    && uri.getPath().lastIndexOf('"',
-                            uri.getPath().length()-1) >= 0) {
-                StringResource sr = new StringResource(uri);
+            if ("urn".equals(i.getScheme())) {
+				if (i.getSchemeSpecificPart().startsWith(ColorResource.SCHEME)) {
+					ColorResource cr = new ColorResource(i);
+					output.add(cr);
+					colorResources.put(i, new WeakReference<>(cr));
+				} else if (i.getSchemeSpecificPart().startsWith(FontResource.SCHEME)) {
+					FontResource fr = new FontResource(i);
+					output.add(fr);
+					fontResources.put(i, new WeakReference<>(fr));
+				} else if (i.getPath().endsWith("\"")
+                    && i.getPath().lastIndexOf('"',
+                            i.getPath().length()-1) >= 0) {
+                StringResource sr = new StringResource(i);
                 output.add(sr);
-                stringResources.put(uri, new WeakReference<>(sr));
-            } else if (uri.getPath().endsWith(".faf")) {
-                FAFileResource far = new FAFileResource(uri);
+                stringResources.put(i, new WeakReference<>(sr));
+            } else if (i.getPath().endsWith(".faf")) {
+                FAFileResource far = new FAFileResource(i);
                 output.add(far);
-                fafResources.put(uri, new WeakReference<>(far));
-            } else if (uri.getPath().endsWith(".sza")) {
-                SZAResource szr = new SZAResource(uri);
+                fafResources.put(i, new WeakReference<>(far));
+            } else if (i.getPath().endsWith(".sza")) {
+                SZAResource szr = new SZAResource(i);
                 output.add(szr);
-                szaResources.put(uri, new WeakReference<>(szr));
-            } else if (uri.getPath().endsWith(".ttf")) {
-                FontResource fr = new FontResource(uri);
+                szaResources.put(i, new WeakReference<>(szr));
+            } else if (i.getPath().endsWith(".ttf")) {
+                FontResource fr = new FontResource(i);
                 output.add(fr);
-                fontResources.put(uri, new WeakReference<>(fr));
-            } else if (uri.getPath().endsWith(".wav")) {
-                AudioResource ar = new AudioResource(uri);
-                output.add(ar);
-                audioResources.put(uri, new WeakReference<>(ar));
-            } else if (uri.getPath().endsWith(".ogg")) {
-                if (uri.getPath().endsWith(".video.ogg")) {
-                    VideoResource vr = new VideoResource(uri);
-                    output.add(vr);
-                    videoResources.put(uri, new WeakReference<>(vr));
-                } else {
-                    AudioResource ar = new AudioResource(uri);
-                    output.add(ar);
-                    audioResources.put(uri, new WeakReference<>(ar));
-                }
-            } else {
-                ImageResource ir = new ImageResource(uri);
-                output.add(ir);
-                imageResources.put(uri, new WeakReference<>(ir));
-            }
+                fontResources.put(i, new WeakReference<>(fr));
+            } else if (!i.getPath().endsWith(".wav")) {
+				thePathToDo(i, output);
+			} else {
+				AudioResource ar = new AudioResource(i);
+				output.add(ar);
+				audioResources.put(i, new WeakReference<>(ar));
+			}
+			}
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to create resource with URI: " + uri, e);
+            logger.log(Level.WARNING, "Failed to create resource with URI: " + i, e);
         }
     }
+
+	private static void thePathToDo(URI i, ResourceSink output) throws IOException, Exception {
+		if (!i.getPath().endsWith(".ogg")) {
+			ImageResource ir = new ImageResource(i);
+			output.add(ir);
+			imageResources.put(i, new WeakReference<>(ir));
+		} else if (i.getPath().endsWith(".video.ogg")) {
+			VideoResource vr = new VideoResource(i);
+			output.add(vr);
+			videoResources.put(i, new WeakReference<>(vr));
+		} else {
+			AudioResource ar = new AudioResource(i);
+			output.add(ar);
+			audioResources.put(i, new WeakReference<>(ar));
+		}
+	}
 
 }
