@@ -131,27 +131,40 @@ public class DebugUtils {
                                                           Player.class);
         List<String> results = new ArrayList<>();
         int fails = 0;
-        for (Colony sColony : sPlayer.getColonies()) {
-            Colony.NoBuildReason reason
-                = sColony.getNoBuildReason(sBuildingType, null);
-            results.add(sColony.getName() + ": " + reason);
-            if (reason == Colony.NoBuildReason.NONE) {
-                if (sBuildingType.isDefenceType()) {
-                    sColony.getTile().cacheUnseen();//+til
-                }
-                Building sBuilding = new ServerBuilding(sGame, sColony,
-                                                        sBuildingType);
-                sColony.addBuilding(sBuilding);//-til
-            } else {
-                fails++;
-            }
-        }
+        for (Colony sColony : sPlayer.getColonies())
+			fails = colonyBuildPlayerNull(sGame, sBuildingType, results, fails, sColony);
         gui.showInformationMessage(join(", ", results));
         if (fails < sPlayer.getSettlements().size()) {
             // Brutally resynchronize
             freeColClient.getConnectController().reconnect();
         }
     }
+
+	private static int colonyBuildPlayerNull(final Game sGame, final BuildingType sBuildingType, List<String> results,
+			int fails, Colony sColony) {
+		{
+            Colony.NoBuildReason reason
+                = sColony.getNoBuildReason(sBuildingType, null);
+            results.add(sColony.getName() + ": " + reason);
+            if (reason == Colony.NoBuildReason.NONE)
+				colonyBuildNull(sGame, sBuildingType, sColony);
+			else {
+                fails++;
+            }
+        }
+		return fails;
+	}
+
+	private static void colonyBuildNull(final Game sGame, final BuildingType sBuildingType, Colony sColony) {
+		{
+		    if (sBuildingType.isDefenceType()) {
+		        sColony.getTile().cacheUnseen();//+til
+		    }
+		    Building sBuilding = new ServerBuilding(sGame, sColony,
+		                                            sBuildingType);
+		    sColony.addBuilding(sBuilding);//-til
+		}
+	}
 
     /**
      * Debug action to add a founding father.
@@ -313,10 +326,7 @@ public class DebugUtils {
         final Tile sTile = sGame.getFreeColGameObject(tile.getId(), Tile.class);
         final GUI gui = freeColClient.getGUI();
 
-        UnitType unitChoice = gui.getChoice(null,
-            StringTemplate.template("prompt.selectUnitType"), "cancel",
-            toSortedList(map(sSpec.getUnitTypeList(), (UnitType ut) ->
-                    new ChoiceItem<UnitType>(Messages.getName(ut), ut))));
+        UnitType unitChoice = guiUnitChoiceThing(sSpec, gui);
         if (unitChoice == null) return;
 
         Unit carrier = null, sCarrier = null;
@@ -342,6 +352,13 @@ public class DebugUtils {
         }
     }
 
+	private static UnitType guiUnitChoiceThing(final Specification sSpec, final GUI gui) {
+		return gui.getChoice(null,
+            StringTemplate.template("prompt.selectUnitType"), "cancel",
+            toSortedList(map(sSpec.getUnitTypeList(), (UnitType ut) ->
+                    new ChoiceItem<UnitType>(Messages.getName(ut), ut))));
+	}
+
     /**
      * Debug action to add goods to a unit.
      *
@@ -357,14 +374,7 @@ public class DebugUtils {
         final Specification sSpec = sGame.getSpecification();
         final GUI gui = freeColClient.getGUI();
 
-        GoodsType goodsType = gui.getChoice(null,
-            StringTemplate.template("prompt.selectGoodsType"),
-            "cancel",
-            transformAndSort(sSpec.getGoodsTypeList(),
-                gt -> !gt.isFoodType() || gt == sSpec.getPrimaryFoodType(),
-                (GoodsType gt) ->
-                    new ChoiceItem<GoodsType>(Messages.getName(gt), gt),
-                Collectors.toList()));
+        GoodsType goodsType = goodsGuiChoiceItemGoods(sSpec, gui);
         if (goodsType == null) return;
 
         String amount = gui.getInput(null,
@@ -386,6 +396,17 @@ public class DebugUtils {
         sgc.setAmount(sGoodsType, a);
     }
 
+	private static GoodsType goodsGuiChoiceItemGoods(final Specification sSpec, final GUI gui) {
+		return gui.getChoice(null,
+            StringTemplate.template("prompt.selectGoodsType"),
+            "cancel",
+            transformAndSort(sSpec.getGoodsTypeList(),
+                gt -> !gt.isFoodType() || gt == sSpec.getPrimaryFoodType(),
+                (GoodsType gt) ->
+                    new ChoiceItem<GoodsType>(Messages.getName(gt), gt),
+                Collectors.toList()));
+	}
+
     /**
      * Debug action to apply a disaster to a colony.
      *
@@ -404,12 +425,7 @@ public class DebugUtils {
                 .addName("%colony%", colony.getName()));
             return;
         }
-        Disaster disaster = gui.getChoice(null,
-            StringTemplate.template("prompt.selectDisaster"), "cancel",
-            toSortedList(map(disasters, (RandomChoice<Disaster> rc) ->
-                    new ChoiceItem<Disaster>(Messages.getName(rc.getObject())
-                        + " " + Integer.toString(rc.getProbability()),
-                        rc.getObject()))));
+        Disaster disaster = guiNullChoice(gui, disasters);
         if (disaster == null) return;
 
         final FreeColServer server = freeColClient.getFreeColServer();
@@ -419,14 +435,28 @@ public class DebugUtils {
         final Disaster sDisaster = sGame.getSpecification()
             .getDisaster(disaster.getId());
         if (server.getInGameController().debugApplyDisaster(sColony, sDisaster)
-            <= 0) {
-            gui.showErrorMessage(StringTemplate
-                .template("error.disasterAvoided")
-                .addName("%colony%", colony.getName())
-                .addNamed("%disaster%", disaster));
-        }
+            <= 0)
+			gameControllerErrorMsg(colony, gui, disaster);
         freeColClient.getInGameController().nextModelMessage();
     }
+
+	private static void gameControllerErrorMsg(final Colony colony, final GUI gui, Disaster disaster) {
+		{
+		gui.showErrorMessage(StringTemplate
+		    .template("error.disasterAvoided")
+		    .addName("%colony%", colony.getName())
+		    .addNamed("%disaster%", disaster));
+      }
+	}
+
+	private static Disaster guiNullChoice(final GUI gui, List<RandomChoice<Disaster>> disasters) {
+		return gui.getChoice(null,
+            StringTemplate.template("prompt.selectDisaster"), "cancel",
+            toSortedList(map(disasters, (RandomChoice<Disaster> rc) ->
+                    new ChoiceItem<Disaster>(Messages.getName(rc.getObject())
+                        + " " + Integer.toString(rc.getProbability()),
+                        rc.getObject()))));
+	}
 
     /**
      * Debug action to change ownership of a colony.
@@ -445,10 +475,7 @@ public class DebugUtils {
         final GUI gui = freeColClient.getGUI();
         final Game game = freeColClient.getGame();
 
-        Player player = gui.getChoice(null,
-            StringTemplate.template("prompt.selectOwner"), "cancel",
-            toSortedList(map(game.getLiveEuropeanPlayers(colony.getOwner()),
-                    (Player p) -> new ChoiceItem<Player>(Messages.message(p.getCountryLabel()), p))));
+        Player player = playerGuiChoice(colony, gui, game);
         if (player == null) return;
 
         ServerPlayer sPlayer = sGame.getFreeColGameObject(player.getId(),
@@ -464,6 +491,13 @@ public class DebugUtils {
         gui.resetMenuBar();
     }
 
+	private static Player playerGuiChoice(final Colony colony, final GUI gui, final Game game) {
+		return gui.getChoice(null,
+            StringTemplate.template("prompt.selectOwner"), "cancel",
+            toSortedList(map(game.getLiveEuropeanPlayers(colony.getOwner()),
+                    (Player p) -> new ChoiceItem<Player>(Messages.message(p.getCountryLabel()), p))));
+	}
+
     /**
      * Debug action to change ownership of a unit.
      *
@@ -478,13 +512,7 @@ public class DebugUtils {
         final GUI gui = freeColClient.getGUI();
         final Game game = unit.getGame();
 
-        Player player = gui.getChoice(null,
-            StringTemplate.template("prompt.selectOwner"), "cancel",
-            transformAndSort(game.getLivePlayers(null),
-                p -> unit.getType().isAvailableTo(p),
-                (Player p) ->
-                    new ChoiceItem<Player>(Messages.message(p.getCountryLabel()), p),
-                Collectors.toList()));
+        Player player = ownerOfColony(unit, gui, game);
         if (player == null || unit.getOwner() == player) return;
 
         final Game sGame = server.getGame();
@@ -503,6 +531,16 @@ public class DebugUtils {
         gui.refresh();
         gui.resetMenuBar();
     }
+
+	private static Player ownerOfColony(final Unit unit, final GUI gui, final Game game) {
+		return gui.getChoice(null,
+            StringTemplate.template("prompt.selectOwner"), "cancel",
+            transformAndSort(game.getLivePlayers(null),
+                p -> unit.getType().isAvailableTo(p),
+                (Player p) ->
+                    new ChoiceItem<Player>(Messages.message(p.getCountryLabel()), p),
+                Collectors.toList()));
+	}
 
     /**
      * Debug action to change the roles of a unit.
@@ -593,18 +631,8 @@ public class DebugUtils {
                     lb.add("Settlement still present in client: ", cSettlement);
                     problemDetected = true;
                 }
-            } else {
-                if (cSettlement == null) {
-                    lb.add("Settlement not present in client: ", sSettlement);
-                    problemDetected = true;
-                } else if (sSettlement.getId().equals(cSettlement.getId())) {
-                    ;// OK
-                } else {
-                    lb.add("Settlements differ.\n  Server: ",
-                        sSettlement.toString(), "\n  Client: ", 
-                        cSettlement.toString(), "\n");
-                }
-            }
+            } else
+				problemDetected = problemDetected(problemDetected, lb, sSettlement, cSettlement);
         }
 
         boolean goodsProblemDetected = false;
@@ -631,6 +659,23 @@ public class DebugUtils {
         }
         return problemDetected;
     }
+
+	private static boolean problemDetected(boolean problemDetected, LogBuilder lb, Settlement sSettlement,
+			Settlement cSettlement) {
+		{
+		    if (cSettlement == null) {
+		        lb.add("Settlement not present in client: ", sSettlement);
+		        problemDetected = true;
+		    } else if (sSettlement.getId().equals(cSettlement.getId())) {
+		        ;// OK
+		    } else {
+		        lb.add("Settlements differ.\n  Server: ",
+		            sSettlement.toString(), "\n  Client: ", 
+		            cSettlement.toString(), "\n");
+		    }
+		}
+		return problemDetected;
+	}
 
     /**
      * Debug action to display an AI colony plan.
@@ -783,15 +828,8 @@ public class DebugUtils {
         lb.add("\nActive units:\n");
 
         Unit u, first = player.getNextActiveUnit();
-        if (first != null) {
-            lb.add(first.toString(), "\nat ", first.getLocation(), "\n");
-            all.remove(first);
-            while (player.hasNextActiveUnit()
-                && (u = player.getNextActiveUnit()) != first) {
-                lb.add(u, "\nat ", u.getLocation(), "\n");
-                all.remove(u);
-            }
-        }
+        if (first != null)
+			firstNotNull(player, all, lb, first);
         lb.add("Going-to units:\n");
         first = player.getNextGoingToUnit();
         if (first != null) {
@@ -811,6 +849,19 @@ public class DebugUtils {
 
         freeColClient.getGUI().showInformationMessage(lb.toString());
     }
+
+	private static void firstNotNull(final Player player, List<Unit> all, LogBuilder lb, Unit first) {
+		Unit u;
+		{
+            lb.add(first.toString(), "\nat ", first.getLocation(), "\n");
+            all.remove(first);
+            while (player.hasNextActiveUnit()
+                && (u = player.getNextActiveUnit()) != first) {
+                lb.add(u, "\nat ", u.getLocation(), "\n");
+                all.remove(u);
+            }
+        }
+	}
 
     /**
      * Debug action to dump a tile to stderr.
@@ -1124,23 +1175,11 @@ public class DebugUtils {
         }
 
         lb.add("\nUnits present\n");
-        for (Unit u : sis.getUnitList()) {
-            Mission m = aiMain.getAIUnit(u).getMission();
-            lb.add(u, " at ", u.getLocation());
-            if (m != null) {
-                lb.add(" ", m.getClass(), ".");
-            }
-            lb.add("\n");
-        }
+        for (Unit u : sis.getUnitList())
+			missionUnitList(aiMain, lb, u);
         lb.add("\nUnits owned\n");
-        for (Unit u : sis.getOwnedUnits()) {
-            Mission m = aiMain.getAIUnit(u).getMission();
-            lb.add(u, " at ", u.getLocation());
-            if (m != null) {
-                lb.add(" ", m.getClass(), ".");
-            }
-            lb.add("\n");
-        }
+        for (Unit u : sis.getOwnedUnits())
+			missionUnitList(aiMain, lb, u);
 
         lb.add("\nTiles\n");
         for (Tile t : sis.getOwnedTiles()) lb.add(t, "\n");
@@ -1150,6 +1189,17 @@ public class DebugUtils {
 
         freeColClient.getGUI().showInformationMessage(lb.toString());
     }
+
+	private static void missionUnitList(final AIMain aiMain, LogBuilder lb, Unit u) {
+		{
+            Mission m = aiMain.getAIUnit(u).getMission();
+            lb.add(u, " at ", u.getLocation());
+            if (m != null) {
+                lb.add(" ", m.getClass(), ".");
+            }
+            lb.add("\n");
+        }
+	}
 
     /**
      * Debug action to run the AI.
