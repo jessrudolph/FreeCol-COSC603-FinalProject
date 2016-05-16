@@ -20,8 +20,6 @@
 package net.sf.freecol.common.model;
 
 import java.lang.ref.WeakReference;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,9 +36,7 @@ import javax.xml.stream.XMLStreamException;
 import net.sf.freecol.common.i18n.NameCache;
 import net.sf.freecol.common.io.FreeColXMLReader;
 import net.sf.freecol.common.io.FreeColXMLWriter;
-import net.sf.freecol.common.model.FreeColObject;
 import net.sf.freecol.common.model.NationOptions.NationState;
-import net.sf.freecol.common.networking.DOMMessage;
 import net.sf.freecol.common.option.OptionGroup;
 import net.sf.freecol.common.util.LogBuilder;
 import net.sf.freecol.common.util.Introspector;
@@ -384,7 +380,7 @@ public class Game extends FreeColGameObject {
 
         // Garbage collect the FCGOs if enough have been removed.
         if (++removeCount > REMOVE_GC_THRESHOLD) {
-            for (FreeColGameObject fcgo : getFreeColGameObjects());
+            for (FreeColGameObject fcgo : getFreeColGameObjects())
             removeCount = 0;
             System.gc(); // Probably a good opportunity.
         }
@@ -1097,33 +1093,6 @@ public class Game extends FreeColGameObject {
     }
 
     /**
-     * Unserialize from XML to a FreeColObject in this game.
-     *
-     * @param <T> The actual return type.
-     * @param xml The xml serialized version of an object.
-     * @param returnClass The expected object class.
-     * @return The unserialized object.
-     * @exception XMLStreamException if there are any problems reading from
-     *     the stream.
-     */
-    public <T extends FreeColObject> T unserialize(String xml,
-        Class<T> returnClass) throws XMLStreamException {
-        try {
-            FreeColXMLReader xr = new FreeColXMLReader(new StringReader(xml));
-            xr.nextTag();
-            T ret = FreeColGameObject.newInstance(this, returnClass);
-            ret.readFromXML(xr);
-            return ret;
-
-        } catch (Exception ex) {
-            throw new XMLStreamException(ex);
-        }
-    }
-
-
-    // Override FreeColGameObject
-
-    /**
      * {@inheritDoc}
      */
     @Override
@@ -1314,7 +1283,7 @@ public class Game extends FreeColGameObject {
                 UUID u = UUID.fromString(str);
                 this.uuid = u;
             } catch (IllegalArgumentException iae) {
-                ;// Preserve existing uuid
+                // Preserve existing uuid
             }
         }
 
