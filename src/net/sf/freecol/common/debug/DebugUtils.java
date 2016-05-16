@@ -159,9 +159,10 @@ public class DebugUtils {
 	}
 
 	private static void colonyBuildNull(final Game sGame, final BuildingType sBuildingType, Colony sColony) {
-		if (sBuildingType.isDefenceType())
+		if (sBuildingType.isDefenceType()){
 			sColony.getTile().cacheUnseen();
-		sColony.addBuilding((new ServerBuilding(sGame, sColony, sBuildingType)));
+		}
+		sColony.addBuilding(new ServerBuilding(sGame, sColony, sBuildingType));
 	}
 
     /**
