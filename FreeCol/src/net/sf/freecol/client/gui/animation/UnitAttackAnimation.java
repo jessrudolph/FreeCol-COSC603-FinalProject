@@ -1,4 +1,4 @@
-/**
+/*
  *  Copyright (C) 2002-2016   The FreeCol Team
  *
  *  This file is part of FreeCol.
@@ -39,7 +39,7 @@ final class UnitAttackAnimation extends FreeColClientHolder {
     private final Tile attackerTile;
     private final Tile defenderTile;
     private final boolean success;
-    private boolean mirror = false;
+    private boolean mirror;
 
 
     /**
@@ -95,7 +95,7 @@ final class UnitAttackAnimation extends FreeColClientHolder {
     private SimpleZippedAnimation getAnimation(Unit unit,
                                                Direction direction) {
         float scale = ((SwingGUI)getGUI()).getMapScale();
-        String roleStr = (unit.hasDefaultRole()) ? ""
+        String roleStr = unit.hasDefaultRole() ? ""
             : "." + unit.getRoleSuffix();
         String startStr = "animation.unit." + unit.getType().getId() + roleStr
                         + ".attack.";
@@ -139,8 +139,7 @@ final class UnitAttackAnimation extends FreeColClientHolder {
 			return sza;
 		}
 
-        sza = getAnimation(startStr, scale, direction.getReverseDirection());
-        return sza;
+        return getAnimation(startStr, scale, direction.getReverseDirection());
     }
 
     /**
@@ -151,17 +150,16 @@ final class UnitAttackAnimation extends FreeColClientHolder {
         Direction direction = attackerTile.getDirection(defenderTile);
         SimpleZippedAnimation sza;
 
-        if (getFreeColClient().getAnimationSpeed(attacker.getOwner()) > 0) {
-            if ((sza = getAnimation(attacker, direction)) != null) {
-                new UnitImageAnimation(gui, attacker, attackerTile, sza, mirror)
-                    .animate();
-            }
-        }
+        if (getFreeColClient().getAnimationSpeed(attacker.getOwner()) > 0 && (sza = getAnimation(attacker, direction)) != null) {
+		    new UnitImageAnimation(gui, attacker, attackerTile, sza, mirror)
+		        .animate();
+		}
 
         if (!success
             && getFreeColClient().getAnimationSpeed(defender.getOwner()) > 0) {
             direction = direction.getReverseDirection();
-            if ((sza = getAnimation(defender, direction)) != null) {
+            sza = getAnimation(defender, direction);
+			if (sza != null) {
                 new UnitImageAnimation(gui, defender, defenderTile, sza, mirror)
                     .animate();
             }
