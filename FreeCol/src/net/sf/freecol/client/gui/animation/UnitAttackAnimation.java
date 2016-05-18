@@ -102,28 +102,42 @@ final class UnitAttackAnimation extends FreeColClientHolder {
 
         SimpleZippedAnimation sza;
         sza = getAnimation(startStr, scale, direction);
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
 
         sza = getAnimation(startStr, scale, direction.getNextDirection());
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
         sza = getAnimation(startStr, scale, direction.getPreviousDirection());
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
 
         sza = getAnimation(startStr, scale, direction.getNextDirection()
                                                      .getNextDirection());
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
         sza = getAnimation(startStr, scale, direction.getPreviousDirection()
                                                      .getPreviousDirection());
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
 
         sza = getAnimation(startStr, scale, direction.getNextDirection()
                                                      .getNextDirection()
                                                      .getNextDirection());
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
         sza = getAnimation(startStr, scale, direction.getPreviousDirection()
                                                      .getPreviousDirection()
                                                      .getPreviousDirection());
-        if(sza != null) return sza;
+        if(sza != null) {
+			return sza;
+		}
 
         sza = getAnimation(startStr, scale, direction.getReverseDirection());
         return sza;
