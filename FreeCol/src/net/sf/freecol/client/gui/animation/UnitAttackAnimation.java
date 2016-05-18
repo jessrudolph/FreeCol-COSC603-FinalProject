@@ -155,7 +155,12 @@ final class UnitAttackAnimation extends FreeColClientHolder {
 		        .animate();
 		}
 
-        if (!success
+        createUnitAnimation(gui, direction);
+    }
+
+	private void createUnitAnimation(final SwingGUI gui, Direction direction) {
+		SimpleZippedAnimation sza;
+		if (!success
             && getFreeColClient().getAnimationSpeed(defender.getOwner()) > 0) {
             direction = direction.getReverseDirection();
             sza = getAnimation(defender, direction);
@@ -164,5 +169,5 @@ final class UnitAttackAnimation extends FreeColClientHolder {
                     .animate();
             }
         }
-    }
+	}
 }
