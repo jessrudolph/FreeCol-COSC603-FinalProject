@@ -219,9 +219,12 @@ public final class FreeCol {
      */
     public static void main(String[] args) {
         freeColRevision = FREECOL_VERSION;
-        JarURLConnection juc;
+       JarURLConnection juc = null;
         try {
-            juc = getJarURLConnection(FreeCol.class);
+          
+           URL url = new URL("jar:file:/FreeCol/FreeCol.jar!/");
+             juc = (JarURLConnection)url.openConnection();
+            
         } catch (IOException ioe) {
             juc = null;
             System.err.println("Unable to open class jar: "
