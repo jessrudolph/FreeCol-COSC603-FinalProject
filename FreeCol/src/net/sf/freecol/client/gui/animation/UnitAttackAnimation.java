@@ -76,14 +76,21 @@ final class UnitAttackAnimation extends FreeColClientHolder {
             return sza;
         }
 
-        specialId = startStr + direction.getEWMirroredDirection().toString().toLowerCase();
+        getSimpleZippedAnimation_1(startStr, scale, direction);
+        return null;
+    }
+
+	private void getSimpleZippedAnimation_1(String startStr, float scale,
+			Direction direction) {
+		SimpleZippedAnimation sza;
+		String specialId;
+		specialId = startStr + direction.getEWMirroredDirection().toString().toLowerCase();
         sza = ResourceManager.getSimpleZippedAnimation(specialId, scale);
         if(sza != null) {
             mirror = true;
             return sza;
         }
-        return null;
-    }
+	}
 
     /**
      * Find the animation for a unit attack.
@@ -101,32 +108,20 @@ final class UnitAttackAnimation extends FreeColClientHolder {
                         + ".attack.";
 
         SimpleZippedAnimation sza;
-        sza = getAnimation(startStr, scale, direction);
-        if(sza != null) {
-			return sza;
-		}
+		simpleZone_1(direction, scale, startStr);
 
-        sza = getAnimation(startStr, scale, direction.getNextDirection());
-        if(sza != null) {
-			return sza;
-		}
-        sza = getAnimation(startStr, scale, direction.getPreviousDirection());
-        if(sza != null) {
-			return sza;
-		}
+        simpleZone_2(direction, scale, startStr);
 
-        sza = getAnimation(startStr, scale, direction.getNextDirection()
-                                                     .getNextDirection());
-        if(sza != null) {
-			return sza;
-		}
-        sza = getAnimation(startStr, scale, direction.getPreviousDirection()
-                                                     .getPreviousDirection());
-        if(sza != null) {
-			return sza;
-		}
+        simpleZone_3(direction, scale, startStr);
 
-        sza = getAnimation(startStr, scale, direction.getNextDirection()
+        simpleZone_4(direction, scale, startStr);
+
+        return getAnimation(startStr, scale, direction.getReverseDirection());
+    }
+
+	private void simpleZone_4(Direction direction, float scale, String startStr) {
+		SimpleZippedAnimation sza;
+		sza = getAnimation(startStr, scale, direction.getNextDirection()
                                                      .getNextDirection()
                                                      .getNextDirection());
         if(sza != null) {
@@ -138,9 +133,41 @@ final class UnitAttackAnimation extends FreeColClientHolder {
         if(sza != null) {
 			return sza;
 		}
+	}
 
-        return getAnimation(startStr, scale, direction.getReverseDirection());
-    }
+	private void simpleZone_3(Direction direction, float scale, String startStr) {
+		SimpleZippedAnimation sza;
+		sza = getAnimation(startStr, scale, direction.getNextDirection()
+                                                     .getNextDirection());
+        if(sza != null) {
+			return sza;
+		}
+        sza = getAnimation(startStr, scale, direction.getPreviousDirection()
+                                                     .getPreviousDirection());
+        if(sza != null) {
+			return sza;
+		}
+	}
+
+	private void simpleZone_2(Direction direction, float scale, String startStr) {
+		SimpleZippedAnimation sza;
+		sza = getAnimation(startStr, scale, direction.getNextDirection());
+        if(sza != null) {
+			return sza;
+		}
+        sza = getAnimation(startStr, scale, direction.getPreviousDirection());
+        if(sza != null) {
+			return sza;
+		}
+	}
+
+	private void simpleZone_1(Direction direction, float scale, String startStr) {
+		SimpleZippedAnimation sza;
+        sza = getAnimation(startStr, scale, direction);
+        if(sza != null) {
+			return sza;
+		}
+	}
 
     /**
      * Do the animation.
