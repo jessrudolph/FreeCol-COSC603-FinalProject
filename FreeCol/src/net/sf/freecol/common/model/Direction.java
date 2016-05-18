@@ -1,4 +1,4 @@
-/**
+/*
  *  Copyright (C) 2002-2016   The FreeCol Team
  *
  *  This file is part of FreeCol.
@@ -44,7 +44,7 @@ public enum Direction implements Named {
     W  (-1,  0, -1,  0),
     NW ( 0, -1, -1, -1);
 
-    public final static int NUMBER_OF_DIRECTIONS = values().length;
+    public static final int NUMBER_OF_DIRECTIONS = values().length;
 
     public static final List<Direction> allDirections
         = makeUnmodifiableList(Direction.N, Direction.NE,
@@ -209,15 +209,15 @@ public enum Direction implements Named {
 
         int step = 1, mask = 1;
         for (int i = 1; i < NUMBER_OF_DIRECTIONS - 1; i += 2) {
-            Direction dr = this.rotate(step);
-            Direction dl = this.rotate(NUMBER_OF_DIRECTIONS - step);
+            Direction dr = rotate(step);
+            Direction dl = rotate(NUMBER_OF_DIRECTIONS - step);
             ret[i] = ((r & mask) == 0) ? dr : dl;
             ret[i+1] = ((r & mask) == 0) ? dl : dr;
             step += 1;
             mask *= 2;
         }
 
-        ret[NUMBER_OF_DIRECTIONS-1] = this.getReverseDirection();
+        ret[NUMBER_OF_DIRECTIONS-1] = getReverseDirection();
         return ret;
     }
 
@@ -243,9 +243,7 @@ public enum Direction implements Named {
 
     // Implement Named
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public String getNameKey() {
         return Messages.nameKey("model." + getKey());
